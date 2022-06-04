@@ -1,5 +1,6 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include <windowsx.h>
 
 LRESULT CALLBACK WinProc(HWND, UINT, WPARAM, LPARAM);
 
@@ -26,20 +27,46 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 		MessageBox(NULL, "Erro na criação da janela!", "Aplicação", MB_ICONERROR);
 		return 0;
 	}
+	int windowWidth = 960;
+	int windowHeight = 540;
 
+	//Conta utilizada para centralizar a janela
+	int windowPosX = GetSystemMetrics(SM_CXSCREEN) / 2 - windowWidth / 2;
+	int windowPosY = GetSystemMetrics(SM_CYSCREEN) / 2 - windowHeight / 2;
+	
 	//criando uma janela baseada na classe "BasicWindow"
-	hwnd = CreateWindow ("BasicWindow",			//classe da janela
-						"Aplicação",			//título da janela
-						WS_OVERLAPPEDWINDOW,	//estilo da janela
-						CW_USEDEFAULT,			//posição x inicial
-						CW_USEDEFAULT,			//posição y inicial
-						CW_USEDEFAULT,			//largura inicial
-						CW_USEDEFAULT,			//altura inicial
-						NULL,					//identificador da janela pai
-						NULL,					//identificador do menu
-						hInstance,				//identificador da aplicação
-						NULL);					//parâmetros de criação
+	hwnd = CreateWindowEx (NULL,							//estilos extras
+						"BasicWindow",						//classe da janela
+						"Aplicação",						//título da janela
+						WS_OVERLAPPED | WS_SYSMENU,			//estilo da janela
+						windowPosX,							//posição x inicial
+						windowPosY,							//posição y inicial
+						windowWidth,						//largura inicial
+						windowHeight,						//altura inicial
+						NULL,								//identificador da janela pai
+						NULL,								//identificador do menu
+						hInstance,							//identificador da aplicação
+						NULL);								//parâmetros de criação
 						
+	// o retangulo com o tamanho da área cliente desejada
+	RECT  winRect = { 0, 0, windowWidth, windowHeight };
+
+	//ajuste o tamanho da janela
+	AdjustWindowRectEx(&winRect, GetWindowStyle(hwnd), GetMenu(hwnd) != NULL, GetWindowExStyle(hwnd));
+
+	//usado para centralizar janela na tela
+	windowPosX = (GetSystemMetrics(SM_CXSCREEN) / 2) - ((winRect.right - winRect.left) / 2);
+	windowPosY = (GetSystemMetrics(SM_CYSCREEN) / 2) - ((winRect.bottom - winRect.top) / 2);
+
+	//redimensiona janela com uma chamada a movewindow
+	MoveWindow(
+		hwnd,							//indentificador da janela
+		windowPosX,						//posição x
+		windowPosY,						//posição y
+		winRect.right - winRect.left,	//largura
+		winRect.bottom - winRect.top,	//altura
+		TRUE							//repintar
+		);
 	//Mostra janela
 	ShowWindow(hwnd, nCmdShow);
 
